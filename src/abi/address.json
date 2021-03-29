@@ -1,0 +1,13 @@
+{
+    "network": "testnet",
+    "testnet": {
+        "ptm": "0xf9996d48D3FED2fBaea1a0568f94E22c54b36850",
+        "vault": "0x2067039ceC98A845471FDE4D6bA7Ed6283692b1D",
+        "controller": "0xD71bF5e9ee1c86A31Ed9daF2E5478c1faAf8d8C2"
+    },
+    "mainnet": {
+        "ptm": "0xf9996d48D3FED2fBaea1a0568f94E22c54b36850",
+        "vault": "0x2067039ceC98A845471FDE4D6bA7Ed6283692b1D",
+        "controller": "0xD71bF5e9ee1c86A31Ed9daF2E5478c1faAf8d8C2"
+    }
+}
