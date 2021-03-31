@@ -1,9 +1,9 @@
 import web3 from './web3';
-import RewardPool from '../abi/Controller.sol/RewardPool.json';
+import SystemPool from '../abi/Controller.sol/SystemPool.json';
 
 const instance = (address) => {
     return (new web3.eth.Contract(
-        RewardPool.abi,
+        SystemPool.abi,
         address
       ));
 }

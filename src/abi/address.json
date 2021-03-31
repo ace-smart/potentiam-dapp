@@ -2,12 +2,12 @@
     "network": "testnet",
     "testnet": {
         "ptm": "0xf9996d48D3FED2fBaea1a0568f94E22c54b36850",
-        "vault": "0x2067039ceC98A845471FDE4D6bA7Ed6283692b1D",
-        "controller": "0xD71bF5e9ee1c86A31Ed9daF2E5478c1faAf8d8C2"
+        "vault": "0x40D9B365B40e155Fd86F1e52511C74BC5A9e9567",
+        "controller": "0x25c2279e1D07e820c1dA46Cc5aBA3cC96E576C3C"
     },
     "mainnet": {
-        "ptm": "0xf9996d48D3FED2fBaea1a0568f94E22c54b36850",
-        "vault": "0x2067039ceC98A845471FDE4D6bA7Ed6283692b1D",
-        "controller": "0xD71bF5e9ee1c86A31Ed9daF2E5478c1faAf8d8C2"
+        "ptm": "",
+        "vault": "",
+        "controller": ""
     }
 }

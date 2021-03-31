@@ -1,14 +1,26 @@
 import React from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Link
 } from "react-router-dom";
 import { Menu } from 'semantic-ui-react';
 
+import web3 from '../contracts/web3';
+import ptm from '../contracts/ptm';
+
 export default () => {
+  const [account, setAccount] = useState('');
+
+  useEffect(() => {
+    web3.eth.getAccounts().then(addr => {
+        setAccount(addr[0]);
+    });
+}, []);
+
   return (
     <Menu style={{ marginTop: '10px' }}>
       <Menu.Menu position="left">
-        <Link to="/">
+        <Link to="/vault">
           <a className="item">Vault</a>
         </Link>
 
@@ -19,6 +31,9 @@ export default () => {
         <Link to="/control">
           <a className="item">Controller</a>
         </Link>
+      </Menu.Menu>
+      <Menu.Menu position="right">
+          <p className="item">{account}</p>
       </Menu.Menu>
     </Menu>
   );

@@ -8,6 +8,8 @@ import web3 from './contracts/web3';
 import { Button } from 'semantic-ui-react';
 import Layout from './components/Layout';
 import Vault from './components/Vault';
+import Transaction from './components/Transaction';
+import Controller from './components/Controller';
 import './App.css';
 
 function App() {
@@ -19,11 +21,15 @@ function App() {
     <div className="App">
       <Layout>
         <Switch>
-          <Route path="/">
+          <Route path="/vault">
             <Vault />
           </Route>
-          <Route path="/trans"></Route>
-          <Route path="/control"></Route>
+          <Route path="/trans">
+            <Transaction />
+          </Route>
+          <Route path="/control">
+            <Controller />
+          </Route>
         </Switch>
       </Layout>
     </div>

@@ -10,6 +10,7 @@ import vaultNode from '../contracts/node';
 export default () => {
     const [totalBalance, setTotalBalance] = useState(0);
     const [sharedBalance, setSharedBalance] = useState(0);
+    const [totalRewards, setTotalRewards] = useState(0);
     const [myBalance, setMyBalance] = useState(0);
     const [walletBalance, setWalletBallance] = useState(0);
     const [account, setAccount] = useState('');
@@ -62,7 +63,7 @@ export default () => {
             await ptm.methods.approve(vault._address, amount).send({from: account});
             await vault.methods.stake(amount).send({from: account});
             setPending(false);
-            updateVaultInfo();
+            updatePage();
 
         } catch (error) {
             console.error(error.message);
@@ -80,7 +81,7 @@ export default () => {
             setPending(true);
             await vault.methods.withdraw(amount).send({from: account});
             setPending(false);
-            updateVaultInfo();
+            updatePage();
 
         } catch (error) {
             console.error(error.message);
@@ -104,16 +105,20 @@ export default () => {
         setClaimAmount(event.target.value);
     }
 
-    const updateVaultInfo = useCallback(() => {
+    const updatePage = useCallback(() => {
         if (!account) return;
 
         vault.methods.totalBalance().call().then(balance => {
             setTotalBalance(balance);
         });
 
-        // vault.methods.sharedBalance().call().then(balance => {
-        //     setSharedBalance(balance);
-        // });
+        vault.methods.sharedBalance().call().then(balance => {
+            setSharedBalance(balance);
+        });
+
+        vault.methods.totalRewards().call().then(balance => {
+            setTotalRewards(balance);
+        });
 
         vault.methods.balanceOf(account).call().then(balance => {
             setMyBalance(balance);
@@ -143,17 +148,17 @@ export default () => {
             setMyNodes(myNodes);
         })
 
-        // vault.methods.sharedUsers().call().then(async addresses => {
-        //     const promises = addresses.map(async addr => {
-        //         return {
-        //             user: addr,
-        //             balance: (await balanceOfUser(addr)),
-        //         }
-        //     });
+        vault.methods.sharedUsers().call().then(async addresses => {
+            const promises = addresses.map(async addr => {
+                return {
+                    address: addr,
+                    balance: (await balanceOfUser(addr)),
+                }
+            });
             
-        //     const users = await Promise.all(promises);
-        //     setSharedUsers(users);
-        // })
+            const users = await Promise.all(promises);
+            setSharedUsers(users);
+        })
     }, [account])
     
     useEffect(() => {
@@ -164,8 +169,8 @@ export default () => {
 
     useEffect(() => {
         if (!account) return;
-        updateVaultInfo();
-    }, [account, updateVaultInfo]);
+        updatePage();
+    }, [account, updatePage]);
 
   return (
     <div>
@@ -173,8 +178,9 @@ export default () => {
         <Form loading={pending}>
             <Statistic.Group size='small'>
                 <Statistic label='Current Balance (PTM)' size='small' value={toEther(myBalance)} />
-                <Statistic label='Wallet Balance (PTM)' size='small' value={toEther(walletBalance)} />
+                <Statistic label='MetaMask Balance (PTM)' size='small' value={toEther(walletBalance)} />
             </Statistic.Group>
+            <br></br>
             <Form.Group withs={2}>
                 <Form.Input placeholder='Amount to stake' type='number' onChange={updateStakeAmount} />
                 <Form.Button content="Stake" primary style={{width:'105px'}} onClick={stake} />
@@ -186,6 +192,7 @@ export default () => {
             <Statistic.Group size='small'>
                 <Statistic label='Current Rewards (PTM)' size='small' value={toEther(rewards)} />
             </Statistic.Group>
+            <br></br>
             <Form.Group withs={2}>
                 <Form.Input placeholder='Amount to claim' type='number' onChange={updateClaimAmount} />
                 <Form.Button content="Claim" primary style={{width:'105px'}} onClick={claim} />
@@ -219,6 +226,8 @@ export default () => {
         <h2>Administrator Role</h2>
         <Statistic.Group size='small'>
             <Statistic label='Total Balance (PTM)' size='small' value={toEther(totalBalance)} />
+            <Statistic label='Shared Balance (PTM)' size='small' value={toEther(sharedBalance)} />
+            <Statistic label='Total Rewards (PTM)' size='small' value={toEther(totalRewards)} />
         </Statistic.Group>
 
         <h3>All Nodes</h3>
@@ -247,10 +256,6 @@ export default () => {
             </Table.Body>
         </Table>
 
-        <Statistic.Group size='small'>
-            <Statistic label='Shared Balance (PTM)' size='small' value={toEther(sharedBalance)} />
-        </Statistic.Group>
-
         <h3>Shared Users</h3>
         <Table striped>
             <Table.Header>
@@ -271,6 +276,7 @@ export default () => {
             })}
             </Table.Body>
         </Table>
+        <br></br>
     </div>
   );
 };
