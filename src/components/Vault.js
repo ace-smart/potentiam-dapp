@@ -22,6 +22,7 @@ export default () => {
     const [withdrawAmount, setWithdrawAmount] = useState(0);
     const [claimAmount, setClaimAmount] = useState(0);
     const [pending, setPending] = useState(false);
+    const [isAdmin, setAdmin] = useState(false);
 
     const toEther = (val) => {
         if (!val) return 0;
@@ -30,6 +31,10 @@ export default () => {
 
     const toWei = (val) => {
         return web3.utils.toWei(val);
+    }
+
+    const toBN = (val) => {
+        return (new web3.utils.BN(val));
     }
 
     const balanceOfNode = async (address) => {
@@ -60,7 +65,10 @@ export default () => {
         const amount = toWei(stakeAmount);
         try {
             setPending(true);
-            await ptm.methods.approve(vault._address, amount).send({from: account});
+            const allowance = await ptm.methods.allowance(account, vault._address).call({from: account});
+            if (toBN(allowance).lt(toBN(amount))) {
+                await ptm.methods.approve(vault._address, toWei('100000')).send({from: account});    
+            }
             await vault.methods.stake(amount).send({from: account});
             setPending(false);
             updatePage();
@@ -89,8 +97,22 @@ export default () => {
         }
     }
 
-    const claim = () => {
+    const claim = async () => {
+        if (!claimAmount) {
+            console.log("Invalid amount to claim");
+            return;
+        }
+        const amount = toWei(claimAmount);
+        try {
+            setPending(true);
+            await vault.methods.claimSome(amount).send({from: account});
+            setPending(false);
+            updatePage();
 
+        } catch (error) {
+            console.error(error.message);
+            setPending(false);
+        }
     }
 
     const updateStakeAmount = (event) => {
@@ -112,7 +134,7 @@ export default () => {
             setTotalBalance(balance);
         });
 
-        vault.methods.sharedBalance().call().then(balance => {
+        vault.methods.totalShares().call().then(balance => {
             setSharedBalance(balance);
         });
 
@@ -130,6 +152,14 @@ export default () => {
 
         ptm.methods.balanceOf(account).call().then(balance => {
             setWalletBallance(balance);
+        })
+
+        vault.methods.admin().call().then(address => {
+            if (address === account) setAdmin(true);
+        })
+
+        vault.methods.governance().call().then(address => {
+            if (address === account) setAdmin(true);
         })
 
         vault.methods.nodeListAll().call({from: account}).then(async addresses => {
@@ -223,59 +253,65 @@ export default () => {
             </Table.Body>
         </Table>
 
-        <h2>Administrator Role</h2>
-        <Statistic.Group size='small'>
-            <Statistic label='Total Balance (PTM)' size='small' value={toEther(totalBalance)} />
-            <Statistic label='Shared Balance (PTM)' size='small' value={toEther(sharedBalance)} />
-            <Statistic label='Total Rewards (PTM)' size='small' value={toEther(totalRewards)} />
-        </Statistic.Group>
+        {isAdmin ? (
+            <>
+                <h2>Administrator Role</h2>
+                    <Statistic.Group size='small'>
+                    <Statistic label='Total Balance (PTM)' size='small' value={toEther(totalBalance)} />
+                    <Statistic label='Shared Balance (PTM)' size='small' value={toEther(sharedBalance)} />
+                    <Statistic label='Total Rewards (PTM)' size='small' value={toEther(totalRewards)} />
+                </Statistic.Group>
 
-        <h3>All Nodes</h3>
+                <h3>All Nodes</h3>
 
-        <Table striped>
-            <Table.Header>
-            <Table.Row>
-                <Table.HeaderCell>Owner</Table.HeaderCell>
-                <Table.HeaderCell>Node</Table.HeaderCell>
-                <Table.HeaderCell>Balance</Table.HeaderCell>
-                <Table.HeaderCell>Is Active</Table.HeaderCell>
-            </Table.Row>
-            </Table.Header>
-
-            <Table.Body key='admin-nodes'>
-            {nodes.map(node => {
-                return (
+                <Table striped>
+                    <Table.Header>
                     <Table.Row>
-                        <Table.Cell>{node.owner}</Table.Cell>
-                        <Table.Cell>{node.address}</Table.Cell>
-                        <Table.Cell>{toEther(node.balance)}</Table.Cell>
-                        <Table.Cell>{node.isActive ? 'active' : ''}</Table.Cell>
+                        <Table.HeaderCell>Owner</Table.HeaderCell>
+                        <Table.HeaderCell>Node</Table.HeaderCell>
+                        <Table.HeaderCell>Balance</Table.HeaderCell>
+                        <Table.HeaderCell>Is Active</Table.HeaderCell>
                     </Table.Row>
-                )
-            })}
-            </Table.Body>
-        </Table>
+                    </Table.Header>
 
-        <h3>Shared Users</h3>
-        <Table striped>
-            <Table.Header>
-            <Table.Row>
-                <Table.HeaderCell>User</Table.HeaderCell>
-                <Table.HeaderCell>Balance</Table.HeaderCell>
-            </Table.Row>
-            </Table.Header>
+                    <Table.Body key='admin-nodes'>
+                    {nodes.map(node => {
+                        return (
+                            <Table.Row>
+                                <Table.Cell>{node.owner}</Table.Cell>
+                                <Table.Cell>{node.address}</Table.Cell>
+                                <Table.Cell>{toEther(node.balance)}</Table.Cell>
+                                <Table.Cell>{node.isActive ? 'active' : ''}</Table.Cell>
+                            </Table.Row>
+                        )
+                    })}
+                    </Table.Body>
+                </Table>
 
-            <Table.Body key='shared-users'>
-            {sharedUsers.map(user => {
-                return (
+                <h3>Shared Users</h3>
+                <Table striped>
+                    <Table.Header>
                     <Table.Row>
-                        <Table.Cell>{user.address}</Table.Cell>
-                        <Table.Cell>{toEther(user.balance)}</Table.Cell>
+                        <Table.HeaderCell>User</Table.HeaderCell>
+                        <Table.HeaderCell>Balance</Table.HeaderCell>
                     </Table.Row>
-                )
-            })}
-            </Table.Body>
-        </Table>
+                    </Table.Header>
+
+                    <Table.Body key='shared-users'>
+                    {sharedUsers.map(user => {
+                        return (
+                            <Table.Row>
+                                <Table.Cell>{user.address}</Table.Cell>
+                                <Table.Cell>{toEther(user.balance)}</Table.Cell>
+                            </Table.Row>
+                        )
+                    })}
+                    </Table.Body>
+                </Table>
+            </>
+        ) : (<></>)
+        }
+        
         <br></br>
     </div>
   );

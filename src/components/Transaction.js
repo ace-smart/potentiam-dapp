@@ -24,6 +24,8 @@ export default () => {
     const [rewardPool, setRewardPool] = useState('');
     const [userAddress, setUserAddress] = useState('');
     const [userBalance, setUserBalance] = useState('');
+    const [isAdmin, setAdmin] = useState(false);
+    const [isBackend, setBackend] = useState(false);
 
     const toEther = (val) => {
         if (!val) return 0;
@@ -161,6 +163,18 @@ export default () => {
             setRewardPool(address);
         });
 
+        controller.methods.admin().call().then(address => {
+            if (address === account) setAdmin(true);
+        })
+
+        controller.methods.governance().call().then(address => {
+            if (address === account) setAdmin(true);
+        })
+
+        controller.methods.backend().call().then(address => {
+            if (address === account) setBackend(true);
+        })
+
         controller.methods.userList().call({from: account}).then(async addresses => {
             const promises = addresses.map(async addr => {
                 return {
@@ -209,49 +223,60 @@ export default () => {
             </Form.Group>
         </Form>
 
-        <h2>Administrator Role</h2>
-        <Statistic.Group size='small'>
-            <Statistic label='System Pool (PTM)' size='small' value={toEther(balanceOfSystemPool)} />
-            <Statistic label='Reward Pool (PTM)' size='small' value={toEther(balanceOfRewardPool)} />
-        </Statistic.Group>
-        <br></br>
-        
+        { isAdmin ? (
+            <>
+                <h2>Administrator Role</h2>
+                <Statistic.Group size='small'>
+                    <Statistic label='System Pool (PTM)' size='small' value={toEther(balanceOfSystemPool)} />
+                    <Statistic label='Reward Pool (PTM)' size='small' value={toEther(balanceOfRewardPool)} />
+                </Statistic.Group>
+                <br></br>
+                
 
-        <h3>User Wallet List</h3>
-        <Table striped>
-            <Table.Header>
-            <Table.Row>
-                <Table.HeaderCell>User</Table.HeaderCell>
-                <Table.HeaderCell>Balance (Fiat)</Table.HeaderCell>
-                <Table.HeaderCell>Balance (PTM)</Table.HeaderCell>
-            </Table.Row>
-            </Table.Header>
-
-            <Table.Body key='shared-users'>
-            {users.map(user => {
-                return (
+                <h3>User Wallet List</h3>
+                <Table striped>
+                    <Table.Header>
                     <Table.Row>
-                        <Table.Cell>{user.address}</Table.Cell>
-                        <Table.Cell>{toEther(user.fiat)}</Table.Cell>
-                        <Table.Cell>{toEther(user.balance)}</Table.Cell>
+                        <Table.HeaderCell>User</Table.HeaderCell>
+                        <Table.HeaderCell>Balance (Fiat)</Table.HeaderCell>
+                        <Table.HeaderCell>Balance (PTM)</Table.HeaderCell>
                     </Table.Row>
-                )
-            })}
-            </Table.Body>
-        </Table>
+                    </Table.Header>
 
-        <h2>Backend Role</h2>
-        <br></br>
-        <Form loading={pending}>
-            <Form.Group width={2}>
-                <Form.Field inline>
-                    <label>Update balance of user wallet</label>
-                    <Input placeholder='User Address' style={{width:"370px"}} onChange={updateUserAddress} />
-                    <Input placeholder='Balance' type='number' onChange={updateUserBalance} />
-                </Form.Field>
-                <Button content="Update" primary onClick={updateUser} />
-            </Form.Group>
-        </Form>
+                    <Table.Body key='shared-users'>
+                    {users.map(user => {
+                        return (
+                            <Table.Row>
+                                <Table.Cell>{user.address}</Table.Cell>
+                                <Table.Cell>{toEther(user.fiat)}</Table.Cell>
+                                <Table.Cell>{toEther(user.balance)}</Table.Cell>
+                            </Table.Row>
+                        )
+                    })}
+                    </Table.Body>
+                </Table>
+            </>
+        ) : (
+            <></>
+        )}
+        
+        { isBackend ? (
+            <>
+                <h2>Backend Role</h2>
+                <br></br>
+                <Form loading={pending}>
+                    <Form.Group width={2}>
+                        <Form.Field inline>
+                            <label>Update balance of user wallet</label>
+                            <Input placeholder='User Address' style={{width:"370px"}} onChange={updateUserAddress} />
+                            <Input placeholder='Balance' type='number' onChange={updateUserBalance} />
+                        </Form.Field>
+                        <Button content="Update" primary onClick={updateUser} />
+                    </Form.Group>
+                </Form>
+            </>
+        ) : (<></>)}
+
         <br></br>
     </div>
   );
