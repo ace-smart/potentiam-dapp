@@ -17,6 +17,8 @@ export default () => {
     const [ptmPrice, setPtmPrice] = useState(0);
     const [withdrawAmount, setWithdrawAmount] = useState(0);
     const [withdrawAmountOfFiat, setWithdrawAmountOfFiat] = useState(0);
+    const [customAmount, setCustomAmount] = useState(0);
+    const [customPercentege, setCustomPercentege] = useState(0);
     const [users, setUsers] = useState([]);
     const [balanceOfSystemPool, setBalanceOfSystemPool] = useState(0);
     const [balanceOfRewardPool, setBalanceOfRewardPool] = useState(0);
@@ -34,6 +36,10 @@ export default () => {
 
     const toWei = (val) => {
         return web3.utils.toWei(val);
+    }
+
+    const toBN = (val) => {
+        return (new web3.utils.BN(val));
     }
 
     const balanceOfPtm = async (address) => {
@@ -82,6 +88,29 @@ export default () => {
         }
     }
 
+    const withdrawCustom = async () => {
+        if (!customAmount || !customPercentege) {
+            console.error("Invalid amount or percentege");
+            return;
+        }
+        if (customPercentege > 100) {
+            console.error("Invalid percentege value");
+            return;
+        }
+        const amount = toWei(customAmount);
+        
+        try {
+            setPending(true);
+            await controller.methods.takeTranactionFee(amount, customPercentege*100).send({from: account});
+            setPending(false);
+            updatePage();
+
+        } catch (error) {
+            console.error(error.message);
+            setPending(false);
+        }
+    }
+
     const claim = () => {
 
     }
@@ -118,6 +147,14 @@ export default () => {
 
     const updateUserBalance = (event) => {
         setUserBalance(event.target.value);
+    }
+
+    const updateCustomAmount = (event) => {
+        setCustomAmount(event.target.value);
+    }
+
+    const updateCustomPercentege = (event) => {
+        setCustomPercentege(event.target.value);
     }
 
     useEffect(() => {
@@ -220,6 +257,12 @@ export default () => {
                 <Form.Input placeholder='Amount of PTM' type='number' onChange={updateWithdrawAmount} />
                 <Form.Button content="Withdraw PTM" primary style={{width:'140px'}} onClick={withdraw} />
                 <label>20% fee</label>
+            </Form.Group>
+            <Form.Group withs={3}>
+                <Form.Input placeholder='Amount of Fiat' type='number' onChange={updateCustomAmount} />
+                <Form.Input placeholder='Pecentegy of Fee' type='number' onChange={updateCustomPercentege} />
+                <Form.Button content="Run Transaction" primary onClick={withdrawCustom} />
+                <label>Custom fee</label>
             </Form.Group>
         </Form>
 

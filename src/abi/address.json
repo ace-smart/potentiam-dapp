@@ -2,8 +2,8 @@
     "network": "testnet",
     "testnet": {
         "ptm": "0xf9996d48D3FED2fBaea1a0568f94E22c54b36850",
-        "vault": "0x9D6360bccbeBD742d379D93A517a80FC9D00a967",
-        "controller": "0xb051FcC833D56F48C75De865fBb51612d131246e"
+        "vault": "0x2415e7BaD1e5B745f26F4c5210712388F32DBDCe",
+        "controller": "0x68cEc3fD3826A015b0eCF68dD85600abF4aC6180"
     },
     "mainnet": {
         "ptm": "",

@@ -26,10 +26,10 @@ export default () => {
   }, [account])
 
   useEffect(() => {
-    web3.eth.getAccounts().then(addr => {
-        setAccount(addr[0]);
-    });
-}, []);
+      web3.eth.getAccounts().then(addr => {
+          setAccount(addr[0]);
+      });
+  }, []);
 
   return (
     <Menu style={{ marginTop: '10px' }}>
