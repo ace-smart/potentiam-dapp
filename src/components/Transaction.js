@@ -258,12 +258,6 @@ export default () => {
                 <Form.Button content="Withdraw PTM" primary style={{width:'140px'}} onClick={withdraw} />
                 <label>20% fee</label>
             </Form.Group>
-            <Form.Group withs={3}>
-                <Form.Input placeholder='Amount of Fiat' type='number' onChange={updateCustomAmount} />
-                <Form.Input placeholder='Pecentegy of Fee' type='number' onChange={updateCustomPercentege} />
-                <Form.Button content="Run Transaction" primary onClick={withdrawCustom} />
-                <label>Custom fee</label>
-            </Form.Group>
         </Form>
 
         { isAdmin ? (
@@ -315,6 +309,12 @@ export default () => {
                             <Input placeholder='Balance' type='number' onChange={updateUserBalance} />
                         </Form.Field>
                         <Button content="Update" primary onClick={updateUser} />
+                    </Form.Group>
+                    <Form.Group withs={3}>
+                        <Form.Input placeholder='Amount of Fiat' type='number' onChange={updateCustomAmount} />
+                        <Form.Input placeholder='Pecentegy of Fee' type='number' onChange={updateCustomPercentege} />
+                        <Form.Button content="Run Transaction" primary onClick={withdrawCustom} />
+                        <label>Custom fee</label>
                     </Form.Group>
                 </Form>
             </>
